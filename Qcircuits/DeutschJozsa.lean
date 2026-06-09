@@ -6,6 +6,7 @@ noncomputable section
 
 namespace DiracRepr
 
+
 /-! ## Function Properties -/
 
 /-- A Boolean function f : Fin (2^n) → Bool is **constant** if it maps
@@ -72,22 +73,7 @@ theorem djPhasesum_correctness {n : ℕ} (hn : n ≥ 1) (f : Fin (2 ^ n) → Boo
   · exact False.elim <| hf <| djPhaseSum_balanced hn f h_balanced
 
 
-/-! ## General Oracle Matrix
-
-The quantum oracle U_f implements |x⟩|y⟩ ↦ |x⟩|y ⊕ f(x)⟩.
-In matrix form: U_f = ∑_x |x⟩⟨x| ⊗ (if f(x) then X else I₂). -/
-
-/-- Standard basis column vector |x⟩ ∈ ℂ^m -/
-def stdKet {m : ℕ} (x : Fin m) : Matrix (Fin m) (Fin 1) ℂ :=
-  Matrix.of fun i _ => if i = x then 1 else 0
-
-/-- Standard basis row vector ⟨x| ∈ ℂ^{1×m} -/
-def stdBra {m : ℕ} (x : Fin m) : Matrix (Fin 1) (Fin m) ℂ :=
-  Matrix.of fun _ j => if j = x then 1 else 0
-
-/-- Standard basis projector |x⟩⟨x| -/
-def stdProj {m : ℕ} (x : Fin m) : Matrix (Fin m) (Fin m) ℂ :=
-  stdKet x * stdBra x
+/-! ## General Oracle Matrix -/
 
 /-- General quantum oracle U_f for f : Fin (2^n) → Bool.
     U_f = ∑_x |x⟩⟨x| ⊗ (if f(x) then X_gate else I₂)
@@ -95,37 +81,6 @@ def stdProj {m : ℕ} (x : Fin m) : Matrix (Fin m) (Fin m) ℂ :=
 def Uf_general (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     Matrix (Fin (2 ^ n * 2)) (Fin (2 ^ n * 2)) ℂ :=
   ∑ x : Fin (2 ^ n), stdProj x ⊗ (if f x then X_gate else I₂)
-
-
-/-! ## Standard Basis Properties -/
-
-/-
-stdProj is a matrix with 1 at (x,x) and 0 elsewhere
--/
-theorem stdProj_apply {m : ℕ} (x : Fin m) (i j : Fin m) :
-    stdProj x i j = if i = x ∧ j = x then 1 else 0 := by
-  unfold stdProj stdKet stdBra;
-  rw [ Matrix.mul_apply ] ; aesop
-
-/-
-Tensor product distributes over finite sums on the left
--/
-theorem kron_sum_left {m n p q : ℕ} (s : Finset ι)
-    (A : ι → Matrix (Fin m) (Fin n) ℂ) (B : Matrix (Fin p) (Fin q) ℂ) :
-    (∑ i ∈ s, A i) ⊗ B = ∑ i ∈ s, (A i ⊗ B) := by
-  ext i j;
-  simp +decide [ Matrix.mul_apply, Matrix.sum_apply, Finset.sum_mul _ _ _ ];
-  simp +decide [ kron ];
-  rw [ ← Finset.sum_mul _ _ _, Matrix.sum_apply ]
-
-/-
-Tensor product distributes over finite sums on the right
--/
-theorem kron_sum_right {m n p q : ℕ} (s : Finset ι)
-    (A : Matrix (Fin m) (Fin n) ℂ) (B : ι → Matrix (Fin p) (Fin q) ℂ) :
-    A ⊗ (∑ i ∈ s, B i) = ∑ i ∈ s, (A ⊗ B i) := by
-  ext i j; simp [kron];
-  simp +decide [ Matrix.sum_apply, Finset.mul_sum _ _ _ ]
 
 
 /-! ## Phase Kickback -/
@@ -139,7 +94,7 @@ theorem X_ket_minus' : X_gate * ket_minus = -ket_minus := by
 
 /-! ## DJ Circuit with General Oracle -/
 
-/-- Step 1: (H^⊗n ⊗ H) |0⟩^⊗n|1⟩ = |+⟩^⊗n |−⟩ -/
+/-- (H^⊗n ⊗ H) |0⟩^⊗n|1⟩ = |+⟩^⊗n |−⟩ -/
 theorem DJ_step1 (n : ℕ) :
     (H_n n ⊗ H_gate) * (ket0_n n ⊗ ket1) = ketp_n n ⊗ ket_minus := by
   rw [L13_kron_mul_kron, QFT_ket0_n, H_ket1]
@@ -150,35 +105,10 @@ def DJ_output (n : ℕ) (f : Fin (2 ^ n) → Bool) : Matrix (Fin (2 ^ n * 2)) (F
 
 
 /-! ### Balanced Case
-
 For balanced f, we show the output is orthogonal to |0⟩^n in the first register,
 by connecting the circuit amplitude to the phase sum. -/
 
-/-
-bra0_n is the conjugate transpose of ket0_n
--/
-theorem bra0_n_eq_conjTranspose (n : ℕ) : bra0_n n = (ket0_n n)ᴴ := by
-  induction' n with n ih;
-  · ext i j; fin_cases i; fin_cases j; simp +decide ;
-  · convert congr_arg₂ ( fun x y => x ⊗ y ) ih ( bra0_eq_conjTranspose_ket0 ) using 1;
-    convert L15_conjTranspose_kron _ _ using 1
-
-/-
-⟨0|^n · |0⟩^n = 1
--/
-theorem bra0_n_ket0_n (n : ℕ) :
-    bra0_n n * ket0_n n = (1 : Matrix (Fin 1) (Fin 1) ℂ) := by
-  induction' n with n ih;
-  · norm_num [bra0_n, ket0_n];
-    exact Matrix.ext fun i j => by fin_cases i; fin_cases j; rfl;
-  · have h_step : bra0_n (n + 1) * ket0_n (n + 1) = (bra0_n n ⊗ bra0) * (ket0_n n ⊗ ket0) := by
-      rfl;
-    rw [ h_step, L13_kron_mul_kron ];
-    rw [ ih, L1_bra0_ket0, L8_kron_one ]
-
-/-
-Entry-wise characterization of U_f
--/
+/-- Entry-wise characterization of U_f -/
 theorem Uf_general_apply (n : ℕ) (f : Fin (2 ^ n) → Bool)
     (i j : Fin (2 ^ n * 2)) :
     Uf_general n f i j =
@@ -193,73 +123,12 @@ theorem Uf_general_apply (n : ℕ) (f : Fin (2 ^ n) → Bool)
   · intro b _ hb; rw [ show ( stdProj b ⊗ if f b = true then X_gate else I₂ ) i j = ( stdProj b ) ( i.divNat ) ( j.divNat ) * ( if f b = true then X_gate else I₂ ) ( i.modNat ) ( j.modNat ) by rfl ] ; rw [ stdProj_apply ] ; aesop;
   · aesop
 
-
-/-! #### Helper lemmas for the amplitude computation -/
-
-/-
-Every entry of ketp_n n equals root2^n (uniform superposition)
--/
-theorem ketp_n_entry (n : ℕ) (i : Fin (2 ^ n)) :
-    (ketp_n n) i 0 = (s2 : ℂ) ^ n := by
-  induction' n with n ih;
-  · fin_cases i ; rfl;
-  · convert congr_arg₂ ( · * · ) ( ih ( i.divNat ) ) ( show ket_plus ( i.modNat ) 0 = s2 from ?_ ) using 1;
-    rcases i.modNat with ( _ | _ | i ) <;> norm_num [ ket_plus ]
-
-/-
-Entries of ketp_n are real
--/
-theorem ketp_n_entry_conj (n : ℕ) (i : Fin (2 ^ n)) :
-    starRingEnd ℂ ((ketp_n n) i 0) = (ketp_n n) i 0 := by
-  rw [ ketp_n_entry ] ; norm_num [ Complex.ext_iff, pow_succ ] ; ring;
-  erw [ Complex.conj_ofReal ] ; norm_num
-
-/-
-s2² = 1/2 in ℂ
--/
-theorem s2_sq : (s2 : ℂ) ^ 2 = 1 / 2 := by
-  norm_num [ Complex.ext_iff, sq ];
-  ring_nf; norm_num;
-
-/-
-Hᴴ = H
--/
-theorem H_gate_conjTranspose : (H_gate)ᴴ = H_gate := by
-  unfold H_gate;
-  unfold B0 B1 B2 B3; norm_num [ ← Matrix.ext_iff ] ;
-  erw [ Complex.conj_ofReal ] ; norm_num
-
-/-
-H_n is Hermitian (self-adjoint)
--/
-theorem H_n_conjTranspose (n : ℕ) : (H_n n)ᴴ = H_n n := by
-  induction' n with n ih
-  · exact Matrix.conjTranspose_one
-  · ext i j
-    simp only [H_n_succ, Matrix.conjTranspose_apply, kron, star_mul', Matrix.of_apply]
-    have h1 := congr_fun (congr_fun ih (i.divNat)) (j.divNat)
-    simp only [Matrix.conjTranspose_apply] at h1
-    have h2 := congr_fun (congr_fun H_gate_conjTranspose (i.modNat)) (j.modNat)
-    simp only [Matrix.conjTranspose_apply] at h2
-    rw [h1, h2]
-
-/-
-bra0_n * H_n = (ketp_n)ᴴ
--/
-theorem bra0_n_mul_H_n (n : ℕ) :
-    bra0_n n * H_n n = (ketp_n n)ᴴ := by
-  rw [ ← QFT_ket0_n ];
-  simp +decide [ ← Matrix.mul_assoc, H_n_conjTranspose ];
-  rw [ bra0_n_eq_conjTranspose ]
-
 /-- The phase-kicked state after oracle, before second Hadamard.
     Defined entry-wise: the x-th amplitude is (-1)^{f(x)} · s2^n -/
 def phaseVec (n : ℕ) (f : Fin (2 ^ n) → Bool) : Matrix (Fin (2 ^ n)) (Fin 1) ℂ :=
   Matrix.of fun i _ => (if f i then (-1 : ℂ) else 1) * s2 ^ n
 
-/-
-Oracle action: U_f(|+⟩^n ⊗ |−⟩) = phaseVec ⊗ |−⟩
--/
+/-- Oracle action: U_f(|+⟩^n ⊗ |−⟩) = phaseVec ⊗ |−⟩ -/
 theorem oracle_on_ketp_minus (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     Uf_general n f * (ketp_n n ⊗ ket_minus) = phaseVec n f ⊗ ket_minus := by
   ext i j; simp +decide [ *, Matrix.mul_apply, Matrix.of_apply ] ;
@@ -345,18 +214,20 @@ theorem DJ_circuit_correctness {n : ℕ} (hn : n ≥ 1) (f : Fin (2 ^ n) → Boo
     have h_bal : IsBalanced f := by tauto
     exact h_nonzero (DJ_general_balanced_orthogonal hn f h_bal)
 
+
+theorem DJ_circuit_correctness_1 {n : ℕ} (hn : n ≥ 1) (f : Fin (2 ^ n) → Bool)
+    (promise : IsConstant f ∨ IsBalanced f) :
+    IsConstant f ↔
+      (((bra0_n n ⊗ bra1) * DJ_output n f)^2 = 1) := by
+      sorry
+
+
+/-! ## example Constant f ≡ 0 -/
+
 /-- Oracle for the constant function f ≡ 0: identity on all qubits.
     U_f|x⟩|y⟩ = |x⟩|y ⊕ 0⟩ = |x⟩|y⟩. -/
 def Uf_const0 (n : ℕ) : Matrix (Fin (2 ^ n * 2)) (Fin (2 ^ n * 2)) ℂ :=
   (1 : Matrix (Fin (2 ^ n)) (Fin (2 ^ n)) ℂ) ⊗ I₂
-
-/-- Oracle for the constant function f ≡ 1: applies X to ancilla.
-    U_f|x⟩|y⟩ = |x⟩|y ⊕ 1⟩. -/
-def Uf_const1 (n : ℕ) : Matrix (Fin (2 ^ n * 2)) (Fin (2 ^ n * 2)) ℂ :=
-  (1 : Matrix (Fin (2 ^ n)) (Fin (2 ^ n)) ℂ) ⊗ X_gate
-
-
-/-! ### Constant f ≡ 0 -/
 
 /-- The f≡0 oracle preserves |+⟩^n ⊗ |−⟩ -/
 theorem DJ_const0_oracle (n : ℕ) :
@@ -371,7 +242,12 @@ theorem DJ_full_const0 (n : ℕ) :
   rw [DJ_step1, DJ_const0_oracle, L13_kron_mul_kron, QFT_ketp_n, H_ket_minus]
 
 
-/-! ### Constant f ≡ 1 -/
+/-! ## example Constant f ≡ 1 -/
+
+/-- Oracle for the constant function f ≡ 1: applies X to ancilla.
+    U_f|x⟩|y⟩ = |x⟩|y ⊕ 1⟩. -/
+def Uf_const1 (n : ℕ) : Matrix (Fin (2 ^ n * 2)) (Fin (2 ^ n * 2)) ℂ :=
+  (1 : Matrix (Fin (2 ^ n)) (Fin (2 ^ n)) ℂ) ⊗ X_gate
 
 /-- The f≡1 oracle maps |+⟩^n ⊗ |−⟩ to −(|+⟩^n ⊗ |−⟩) -/
 theorem DJ_const1_oracle (n : ℕ) :
@@ -387,6 +263,38 @@ theorem DJ_full_const1 (n : ℕ) :
     = -(ket0_n n ⊗ ket1) := by
   rw [DJ_step1, DJ_const1_oracle]
   rw [Matrix.mul_neg, L13_kron_mul_kron, QFT_ketp_n, H_ket_minus]
+
+
+/-! ## example Balanced Function: f(x) = x mod 2 (generalized identity) -/
+
+/-- The generalized identity function: f(x) = (x mod 2 = 1).
+    For n = 1, this equals f(0) = false, f(1) = true, i.e., f(x) = x. -/
+def f_mod2 (n : ℕ) : Fin (2 ^ n) → Bool :=
+  fun x => decide (x.val % 2 = 1)
+
+/-
+The identity function is balanced for n ≥ 1
+-/
+theorem f_mod2_balanced {n : ℕ} (hn : n ≥ 1) : IsBalanced (f_mod2 n) := by
+  unfold IsBalanced f_mod2;
+  rcases n with ( _ | n ) <;> simp_all +decide [ Nat.pow_succ' ];
+  rw [ Finset.card_eq_of_bijective ];
+  use fun i hi => ⟨ 2 * i + 1, by linarith [ pow_succ' 2 n ] ⟩;
+  · simp +zetaDelta at *;
+    exact fun a ha => ⟨ a / 2, Nat.div_lt_of_lt_mul <| by linarith [ Fin.is_lt a, pow_succ' 2 n ], by congr; linarith [ Nat.mod_add_div a 2 ] ⟩;
+  · norm_num [ Nat.add_mod ];
+  · aesop
+
+/-
+For n = 1, f_mod2 agrees with the identity on Fin 2
+-/
+theorem f_mod2_n1 : f_mod2 1 = fun x : Fin 2 => decide (x = 1) := by
+  decide +revert
+
+/-- The DJ circuit correctly identifies f_mod2 as balanced for any n ≥ 1 -/
+theorem DJ_f_mod2_balanced {n : ℕ} (hn : n ≥ 1) :
+    (bra0_n n ⊗ bra1) * DJ_output n (f_mod2 n) = 0 :=
+  DJ_general_balanced_orthogonal hn (f_mod2 n) (f_mod2_balanced hn)
 
 end DiracRepr
 end

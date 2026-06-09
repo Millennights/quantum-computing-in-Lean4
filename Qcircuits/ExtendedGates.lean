@@ -9,7 +9,6 @@ namespace DiracRepr
 /-! ## Additional Quantum Gates
 These gates are used in the
 QFT,
-Deutsch-Jozsa,
 Simon,
 Superdense coding protocols.
 -/
@@ -111,30 +110,6 @@ theorem S_gate_ket0 : S_gate * ket0 = ket0 := by
 theorem S_gate_ket1 : S_gate * ket1 = I • ket1 := by
   ext i j; fin_cases i <;> fin_cases j <;>
   simp [S_gate, B0, B3, ket1, Matrix.mul_apply, Fin.sum_univ_succ]
-
-/-! ### CX action on |+⟩⊗|+⟩ and |+⟩⊗|-⟩ -/
-
-/-
-CX|+,+⟩ = |+,+⟩ (used in Deutsch-Jozsa)
--/
-theorem CX_ketpp : CX * (ket_plus ⊗ ket_plus) = ket_plus ⊗ ket_plus := by
-  unfold CX ket_plus; norm_num [ B0, B3, X_gate, B1, ket0, ket1, bra0, bra1, kron ] ;
-  ext i j; fin_cases i <;> fin_cases j <;> norm_num [ Fin.sum_univ_succ, Matrix.mul_apply, B2 ] ;
-  · simp +decide [ Fin.divNat, Fin.modNat, I₂ ] at *;
-  · simp +decide [ Fin.divNat, Fin.modNat, I₂ ] at *;
-  · simp +decide [ Fin.divNat, Fin.modNat ] at *;
-  · simp +decide [ Fin.divNat, Fin.modNat ] at *
-
-/-
-CX|+,−⟩ = |−,−⟩ (phase kickback)
--/
-theorem CX_ketpm : CX * (ket_plus ⊗ ket_minus) = ket_minus ⊗ ket_minus := by
-  unfold CX ket_plus ket_minus;
-  rw [ ← Matrix.ext_iff ];
-  norm_num [ Fin.forall_fin_succ, Matrix.mul_apply ];
-  simp +decide [ B0, B3, X_gate, kron ];
-  simp +decide [ Fin.sum_univ_succ, Fin.divNat, Fin.modNat, I₂, B1, B2 ];
-  rfl
 
 end DiracRepr
 end
