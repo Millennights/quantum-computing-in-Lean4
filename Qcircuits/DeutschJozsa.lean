@@ -156,9 +156,7 @@ theorem oracle_on_ketp_minus (n : ℕ) (f : Fin (2 ^ n) → Bool) :
   · ext ⟨ x, hx ⟩ ; simp +decide [ Fin.ext_iff, Nat.div_eq_of_lt ] ;
     lia
 
-/-
-Inner product: (ketp_n)ᴴ * phaseVec = (1/2^n) · djPhaseSum · I
--/
+/-- Inner product: (ketp_n)ᴴ * phaseVec = (1/2^n) · djPhaseSum · I -/
 theorem ketp_conj_phaseVec (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     (ketp_n n)ᴴ * phaseVec n f =
     (1 / (2 : ℂ) ^ n) • ((djPhaseSum n f : ℤ) : ℂ) •
@@ -168,9 +166,7 @@ theorem ketp_conj_phaseVec (n : ℕ) (f : Fin (2 ^ n) → Bool) :
   rw [ Fin.eq_zero i, Fin.eq_zero j ] ; norm_num [ ketp_n_entry ] ; ring;
   norm_cast ; norm_num [ pow_mul', ← mul_pow ]
 
-/-
-Inner product of ⟨0|^n⟨1| with the DJ output connects to the phase sum
--/
+/-- Inner product of ⟨0|^n⟨1| with the DJ output connects to the phase sum -/
 theorem DJ_amplitude_zero (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     (bra0_n n ⊗ bra1) * DJ_output n f =
     (1 / (2 : ℂ) ^ n) • ((djPhaseSum n f : ℤ) : ℂ) •
@@ -272,9 +268,7 @@ theorem DJ_full_const1 (n : ℕ) :
 def f_mod2 (n : ℕ) : Fin (2 ^ n) → Bool :=
   fun x => decide (x.val % 2 = 1)
 
-/-
-The identity function is balanced for n ≥ 1
--/
+/-- The identity function is balanced for n ≥ 1 -/
 theorem f_mod2_balanced {n : ℕ} (hn : n ≥ 1) : IsBalanced (f_mod2 n) := by
   unfold IsBalanced f_mod2;
   rcases n with ( _ | n ) <;> simp_all +decide [ Nat.pow_succ' ];
@@ -285,9 +279,7 @@ theorem f_mod2_balanced {n : ℕ} (hn : n ≥ 1) : IsBalanced (f_mod2 n) := by
   · norm_num [ Nat.add_mod ];
   · aesop
 
-/-
-For n = 1, f_mod2 agrees with the identity on Fin 2
--/
+/-- For n = 1, f_mod2 agrees with the identity on Fin 2 -/
 theorem f_mod2_n1 : f_mod2 1 = fun x : Fin 2 => decide (x = 1) := by
   decide +revert
 
