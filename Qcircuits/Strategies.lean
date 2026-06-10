@@ -6,9 +6,7 @@ noncomputable section
 
 namespace DiracRepr
 
-/-
-B₀ = |0⟩⟨0|
--/
+/-- B₀ = |0⟩⟨0| -/
 theorem B0_ket0 : B0 * ket0 = ket0 := by
   ext i j; fin_cases i <;> fin_cases j <;> norm_num [ B0, ket0 ] ;
 
@@ -18,9 +16,7 @@ theorem B0_ket1 : B0 * ket1 = 0 := by
   -- The matrix !![0; 0] is equal to the zero matrix because both rows are zeros.
   ext i j; fin_cases i <;> fin_cases j <;> rfl
 
-/-
-B₁ = |0⟩⟨1|
--/
+/-- B₁ = |0⟩⟨1| -/
 theorem B1_ket0 : B1 * ket0 = 0 := by
   ext i j; fin_cases i <;> fin_cases j <;> norm_num [ Matrix.mul_apply, B1, bra0 ] ;
 
@@ -28,12 +24,10 @@ theorem B1_ket1 : B1 * ket1 = ket0 := by
   -- By definition of matrix multiplication, we can compute each element of the resulting matrix.
   ext i j; simp [B1, ket1]
 
-/-
-B₂ = |1⟩⟨0|
--/
+/-- B₂ = |1⟩⟨0| -/
 theorem B2_ket0 : B2 * ket0 = ket1 := by
   ext i
-  simp [B2, ket0, Matrix.mul_apply, Matrix.diagonal_apply, Matrix.one_apply]
+  simp [B2, ket0, Matrix.mul_apply]
 
 theorem B2_ket1 : B2 * ket1 = 0 := by
   -- By definition of $B2$, we have $B2 = |1⟩⟨0|$.
@@ -41,9 +35,7 @@ theorem B2_ket1 : B2 * ket1 = 0 := by
   -- By definition of matrix equality, we need to show that all elements of the matrix are zero.
   ext i j; fin_cases i <;> fin_cases j <;> rfl
 
-/-
-B₃ = |1⟩⟨1|
--/
+/-- B₃ = |1⟩⟨1| -/
 theorem B3_ket0 : B3 * ket0 = 0 := by
   ext i j; fin_cases i <;> fin_cases j <;> norm_num [ B3, B2, B1, B0, ket1, ket0, bra1, bra0 ] ;
 
@@ -102,7 +94,7 @@ theorem I2_ket1 : I₂ * ket1 = ket1 := by
 /-! ### Pauli-X gate: X|0⟩ = |1⟩, X|1⟩ = |0⟩ -/
 
 theorem X_ket0 : X_gate * ket0 = ket1 := by
-  unfold X_gate; simp +decide [ add_mul ] ;
+  unfold X_gate; simp +decide ;
   unfold B1 B2; norm_num [ Matrix.add_mul, Matrix.mul_add, Matrix.mul_assoc ]
 
 theorem X_ket1 : X_gate * ket1 = ket0 := by
@@ -162,7 +154,7 @@ theorem X_ket_plus : X_gate * ket_plus = ket_plus := by
 
 theorem X_ket_minus : X_gate * ket_minus = -ket_minus := by
   unfold ket_minus;
-  simp +decide [ X_ket0, X_ket1, DiracRepr.X_gate ];
+  simp +decide [DiracRepr.X_gate];
   ext i j ; fin_cases i <;> fin_cases j <;> norm_num [ Matrix.mul_apply, B1, B2 ]
 
 theorem Z_ket_plus : Z_gate * ket_plus = ket_minus := by

@@ -37,7 +37,7 @@ theorem djPhaseSum_eq_sub_twice_card (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     djPhaseSum n f = (2 ^ n : ℤ) -
       2 * ((Finset.univ.filter (fun x => f x = true)).card : ℤ) := by
   unfold djPhaseSum
-  simp +decide [Finset.sum_ite, Finset.filter_not]
+  simp +decide [Finset.sum_ite]
   have := Finset.card_add_card_compl (Finset.filter (fun x => f x = true) Finset.univ)
   norm_num at *; linarith
 
@@ -88,7 +88,7 @@ def Uf_general (n : ℕ) (f : Fin (2 ^ n) → Bool) :
 /-- X gate sends |−⟩ to −|−⟩ -/
 theorem X_ket_minus' : X_gate * ket_minus = -ket_minus := by
   unfold ket_minus
-  simp +decide [X_ket0, X_ket1, DiracRepr.X_gate]
+  simp +decide [DiracRepr.X_gate]
   ext i j; fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, B1, B2]
 
 
@@ -115,7 +115,7 @@ theorem Uf_general_apply (n : ℕ) (f : Fin (2 ^ n) → Bool)
       if i.divNat = j.divNat then
         (if f i.divNat then X_gate else I₂) i.modNat j.modNat
       else 0 := by
-  unfold Uf_general; simp +decide [ Finset.sum_apply, Matrix.sum_apply ] ;
+  unfold Uf_general; simp +decide [Matrix.sum_apply] ;
   rw [ Finset.sum_eq_single ( i.divNat ) ];
   · split_ifs <;> simp_all +decide [ stdProj_apply, kron ];
     · tauto;
@@ -131,29 +131,29 @@ def phaseVec (n : ℕ) (f : Fin (2 ^ n) → Bool) : Matrix (Fin (2 ^ n)) (Fin 1)
 /-- Oracle action: U_f(|+⟩^n ⊗ |−⟩) = phaseVec ⊗ |−⟩ -/
 theorem oracle_on_ketp_minus (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     Uf_general n f * (ketp_n n ⊗ ket_minus) = phaseVec n f ⊗ ket_minus := by
-  ext i j; simp +decide [ *, Matrix.mul_apply, Matrix.of_apply ] ;
-  simp +decide [ Uf_general_apply, phaseVec, Matrix.mul_apply ];
-  simp +decide [ Finset.sum_ite, Finset.filter_eq, Finset.filter_ne, ketp_n_entry, ket_minus, X_gate, I₂ ];
-  erw [ show ( Finset.filter ( fun x => i.divNat = x.divNat ) Finset.univ : Finset ( Fin ( 2 ^ n * 2 ) ) ) = { ⟨ i.divNat * 2, by linarith [ Fin.is_lt i.divNat, Fin.is_lt i ] ⟩, ⟨ i.divNat * 2 + 1, by linarith [ Fin.is_lt i.divNat, Fin.is_lt i ] ⟩ } from ?_ ] ; simp +decide [ Finset.sum_pair, Finset.sum_singleton, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite ] ; ring;
+  ext i j; simp +decide [*, Matrix.mul_apply] ;
+  simp +decide [Uf_general_apply, phaseVec];
+  simp +decide [Finset.sum_ite, ket_minus, X_gate, I₂];
+  erw [ show ( Finset.filter ( fun x => i.divNat = x.divNat ) Finset.univ : Finset ( Fin ( 2 ^ n * 2 ) ) ) = { ⟨ i.divNat * 2, by linarith [ Fin.is_lt i.divNat, Fin.is_lt i ] ⟩, ⟨ i.divNat * 2 + 1, by linarith [ Fin.is_lt i.divNat, Fin.is_lt i ] ⟩ } from ?_ ] ; simp +decide [Finset.sum_singleton] ; ring;
   · rcases Nat.mod_two_eq_zero_or_one i with h | h <;> simp +decide [ Fin.modNat, h ];
-    · split_ifs <;> simp +decide [ *, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite ];
-      · simp +decide [ B1, B2, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite, Finset.filter_eq, Finset.filter_ne, ketp_n_entry, ket_minus, X_gate, I₂, kron ];
-        simp +decide [ *, Fin.add_def, Fin.mul_def, Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt ];
-        simp +decide [ Fin.divNat, Fin.modNat, Nat.add_div, Nat.mul_div_assoc, Nat.mul_mod, Nat.add_mod, h ];
+    · split_ifs <;> simp +decide [*];
+      · simp +decide [B1, B2, Matrix.mul_apply, Matrix.of_apply, kron];
+        simp +decide [*];
+        simp +decide [Fin.divNat, Fin.modNat, Nat.add_div, Nat.add_mod, h];
         rw [ ketp_n_entry ] ; ring;
         norm_num [ s2 ] ; ring;
-      · simp +decide [ *, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite, Finset.filter_eq, Finset.filter_ne, Fin.modNat, Fin.divNat, kron, Matrix.kroneckerMap ] ; ring!;
-        simp +decide [ *, ketp_n_entry, mul_assoc, mul_comm, mul_left_comm, div_eq_mul_inv ];
+      · simp +decide [*, Matrix.of_apply, Fin.modNat, Fin.divNat, kron] ; ring!;
+        simp +decide [*, ketp_n_entry, mul_comm, mul_left_comm, div_eq_mul_inv];
         norm_num [ show f ⟨ i / 2, by linarith [ Fin.is_lt i, Nat.div_mul_le_self i 2, Nat.mod_add_div i 2 ] ⟩ = false from by simpa using ‹¬f i.divNat = true› ] ; ring;
         norm_num;
-    · split_ifs <;> simp +decide [ *, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite, Finset.filter_eq, Finset.filter_ne, B1, B2, I₂, ketp_n_entry, ket_minus, X_gate, I₂ ] ; ring;
-      · simp +decide [ *, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite, Finset.filter_eq', Finset.filter_ne', B1, B2, I₂, ketp_n, phaseVec, kron ] ; ring;
+    · split_ifs <;> simp +decide [*, Matrix.of_apply, B1, B2] ; ring;
+      · simp +decide [*, Matrix.of_apply, kron] ; ring;
         simp +decide [ Fin.divNat, Fin.modNat, h, ketp_n_entry ] ; ring;
         norm_num [ mul_assoc, ← mul_pow ];
-      · simp +decide [ *, Matrix.mul_apply, Matrix.of_apply, Finset.sum_ite, Finset.filter_eq, Finset.filter_ne, B1, B2, I₂, ketp_n_entry, ket_minus, X_gate, I₂, kron ] ; ring;
+      · simp +decide [*, Matrix.of_apply, kron] ; ring;
         simp +decide [ Fin.modNat, Fin.divNat, h, ketp_n_entry ] ; ring;
         norm_num;
-  · ext ⟨ x, hx ⟩ ; simp +decide [ Fin.ext_iff, Nat.div_eq_of_lt ] ;
+  · ext ⟨ x, hx ⟩ ; simp +decide [Fin.ext_iff] ;
     lia
 
 /-- Inner product: (ketp_n)ᴴ * phaseVec = (1/2^n) · djPhaseSum · I -/
@@ -162,7 +162,7 @@ theorem ketp_conj_phaseVec (n : ℕ) (f : Fin (2 ^ n) → Bool) :
     (1 / (2 : ℂ) ^ n) • ((djPhaseSum n f : ℤ) : ℂ) •
       (1 : Matrix (Fin 1) (Fin 1) ℂ) := by
   ext i j; simp +decide [ Matrix.mul_apply, djPhaseSum ] ; ring;
-  simp +decide [ Fin.eq_zero, phaseVec, ketp_n_entry_conj, mul_assoc, mul_comm, mul_left_comm, Finset.mul_sum _ _ _, Finset.sum_mul ];
+  simp +decide [Fin.eq_zero, phaseVec, ketp_n_entry_conj, mul_comm, Finset.mul_sum _ _ _];
   rw [ Fin.eq_zero i, Fin.eq_zero j ] ; norm_num [ ketp_n_entry ] ; ring;
   norm_cast ; norm_num [ pow_mul', ← mul_pow ]
 
@@ -177,7 +177,7 @@ theorem DJ_amplitude_zero (n : ℕ) (f : Fin (2 ^ n) → Bool) :
   rw [ h1, oracle_on_ketp_minus ];
   rw [ L13_kron_mul_kron, L13_kron_mul_kron ];
   rw [ ← Matrix.mul_assoc, bra0_n_mul_H_n, ketp_conj_phaseVec ] ; norm_num [ H_ket_minus ];
-  ext i j; simp +decide [ Matrix.mul_apply ] ;
+  ext i j; simp +decide ;
   fin_cases i ; fin_cases j ; norm_num [ Matrix.smul_eq_diagonal_mul ];
   exact mul_one _
 
@@ -305,7 +305,7 @@ def f_mod2 (n : ℕ) : Fin (2 ^ n) → Bool :=
 /-- The identity function is balanced for n ≥ 1 -/
 theorem f_mod2_balanced {n : ℕ} (hn : n ≥ 1) : IsBalanced (f_mod2 n) := by
   unfold IsBalanced f_mod2;
-  rcases n with ( _ | n ) <;> simp_all +decide [ Nat.pow_succ' ];
+  rcases n with ( _ | n ) <;> simp_all +decide;
   rw [ Finset.card_eq_of_bijective ];
   use fun i hi => ⟨ 2 * i + 1, by linarith [ pow_succ' 2 n ] ⟩;
   · simp +zetaDelta at *;

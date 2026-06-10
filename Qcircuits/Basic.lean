@@ -60,7 +60,7 @@ def I₂ : Matrix (Fin 2) (Fin 2) ℂ := 1
 def X_gate : Matrix (Fin 2) (Fin 2) ℂ := B1 + B2
 
 /-- Pauli-Y gate: Y = -i·|0⟩⟨1| + i·|1⟩⟨0| -/
--- I是虚数单位，定义为0 + 1i，区分I₂
+-- I = 0 + 1i
 def Y_gate : Matrix (Fin 2) (Fin 2) ℂ := (-I) • B1 + I • B2
 
 /-- Pauli-Z gate (phase flip): Z = |0⟩⟨0| − |1⟩⟨1| = B₀ − B₃ -/
@@ -79,13 +79,11 @@ using `Fin.divNat` and `Fin.modNat` to map indices.
     For `A : Matrix (Fin m) (Fin n) ℂ`
     and `B : Matrix (Fin p) (Fin q) ℂ`,
     `kron A B : Matrix (Fin (m*p)) (Fin (n*q)) ℂ`. -/
--- 张量积部分可尝试替换为Mathlib中已有的定义，但实际使用效果不好
 def kron {m n p q : ℕ}
   (A : Matrix (Fin m) (Fin n) ℂ)
   (B : Matrix (Fin p) (Fin q) ℂ) :
     Matrix (Fin (m * p)) (Fin (n * q)) ℂ :=
   Matrix.of fun i j => A i.divNat j.divNat * B i.modNat j.modNat
-/-! 70代表优先级 -/
 infixl:70 " ⊗ " => kron
 
 
@@ -105,16 +103,10 @@ def CX : Matrix (Fin 4) (Fin 4) ℂ := B0 ⊗ I₂ + B3 ⊗ X_gate
 
 
 /-! ## Simp lemmas for matrix element access -/
--- 简化器应保持右边比左边更简单，这一部分可能需要修改。将这一部分用于Laws验证带来很大简便
 @[simp] lemma ket0_apply : ket0 = !![1; 0] := rfl
 @[simp] lemma ket1_apply : ket1 = !![0; 1] := rfl
 @[simp] lemma bra0_apply : bra0 = !![1, 0] := rfl
 @[simp] lemma bra1_apply : bra1 = !![0, 1] := rfl
-
-#eval ket0 ⊗ ket0
-#eval ket0 ⊗ ket1
-#eval ket1 ⊗ ket0
-#eval ket1 ⊗ ket1
 
 end DiracRepr
 end

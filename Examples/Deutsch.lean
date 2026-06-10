@@ -89,8 +89,8 @@ Step 2: (I₂ ⊗ X) × (|+⟩ ⊗ |−⟩) = (-1) • (|+⟩ ⊗ |−⟩) f=1,�
 -/
 theorem deutsch1_step2 :
     (I₂ ⊗ X_gate) * ketpm = (-1 : ℂ) • ketpm := by
-      simp +decide [ ← Matrix.ext_iff, Fin.forall_fin_succ, Matrix.mul_apply, Matrix.vecMul ];
-      simp +decide [ Fin.sum_univ_succ, Matrix.mul_apply, DiracRepr.kron ];
+      simp +decide [← Matrix.ext_iff, Fin.forall_fin_succ, Matrix.mul_apply];
+      simp +decide [Fin.sum_univ_succ, DiracRepr.kron];
       simp +decide [ Fin.divNat, Fin.modNat, X_gate, ket_plus, ket_minus ] ; ring_nf ; norm_num [ Complex.ext_iff ] ;
       norm_num [ sq, I₂, B1, B2 ] at *
 
@@ -126,14 +126,14 @@ theorem deutsch2_step2 :
     CX * ketpm = ketmm := by
       unfold CX ketpm;
       ext i j; fin_cases i <;> fin_cases j <;> norm_num [ B0, B3, X_gate, ket_plus, ket_minus, ketmm, Matrix.mul_apply ] ;
-      · simp +decide [ Matrix.mul_apply, kron ];
+      · simp +decide [kron];
         simp +decide [ Fin.sum_univ_succ, Fin.divNat, Fin.modNat, I₂, B1, B2 ];
-      · simp +decide [ Matrix.mul_apply, Fin.sum_univ_succ, Matrix.mulVec, dotProduct, B1, B2, I₂ ];
-        simp +decide [ Matrix.mul_apply, Fin.sum_univ_succ, Matrix.mulVec, dotProduct, B1, B2, I₂, kron ];
+      · simp +decide [Fin.sum_univ_succ, B1, B2, I₂];
+        simp +decide [kron];
         simp +decide [ Fin.divNat, Fin.modNat ];
-      · simp +decide [ Matrix.mul_apply, Fin.sum_univ_succ, Matrix.vecHead, Matrix.vecTail, kron ];
+      · simp +decide [Fin.sum_univ_succ, kron];
         simp +decide [ Fin.divNat, Fin.modNat, B1, B2, I₂ ];
-      · simp +decide [ Matrix.mul_apply, kron ];
+      · simp +decide [kron];
         simp +decide [ Fin.sum_univ_succ, Fin.divNat, Fin.modNat, I₂, B1, B2 ]
 
 /-
@@ -162,8 +162,8 @@ theorem deutsch3_step2 :
     not_CX * ketpm = (-1 : ℂ) • ketmm := by
       simp [not_CX, B0, B3, I₂];
       simp +decide [ ← Matrix.ext_iff, Fin.forall_fin_succ, X_gate, ketpm, ketmm ];
-      simp +decide [ Matrix.mul_apply, Matrix.mulVec, B1, B2, ket_plus, ket_minus ];
-      simp +decide [ Fin.sum_univ_succ, Fin.sum_univ_zero, Matrix.mul_apply, Matrix.one_apply, Matrix.of_apply, kron ];
+      simp +decide [Matrix.mul_apply, B1, B2, ket_plus, ket_minus];
+      simp +decide [Fin.sum_univ_succ, Matrix.one_apply, Matrix.of_apply, kron];
       simp +decide [ Fin.divNat, Fin.modNat ] at *
 
 /-

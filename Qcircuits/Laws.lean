@@ -46,7 +46,6 @@ theorem L2_add_assoc {m n : ℕ}
 Tensor product associativity (stated via submatrix cast since (a*c)*e ≠ a*(c*e) definitionally)
 (m * p) * r 与 m * (p * r) 在 Lean 中是不同的类型，但它们是同构的，因此我们可以通过一个子矩阵转换来表达它们之间的关系。
 -/
---这一部分待检查（通过lean检查，但需要检查basic中张量积定义）或替换为Mathlib中已有的定义
 theorem L2_kron_assoc {a b c d e f : ℕ}
     (A : Matrix (Fin a) (Fin b) ℂ) (B : Matrix (Fin c) (Fin d) ℂ) (C : Matrix (Fin e) (Fin f) ℂ) :
     ∀ (i : Fin ((a * c) * e)) (j : Fin ((b * d) * f)),
@@ -70,7 +69,7 @@ theorem L2_kron_assoc {a b c d e f : ℕ}
                   · grind;
                   · norm_num [ Nat.mul_assoc, Nat.mul_div_assoc ];
                     norm_num [ Nat.add_mod, Nat.mul_mod, Nat.mod_eq_of_lt ];
-                    split_ifs <;> simp_all +decide [ Nat.div_eq_of_lt ];
+                    split_ifs <;> simp_all +decide;
                     · linarith [ Nat.mod_lt ( i : ℕ ) ( by linarith : 0 < e + 1 + 1 ) ];
                     · exact Nat.le_of_lt_succ ( Nat.div_lt_of_lt_mul <| by nlinarith [ Nat.mod_lt ( i : ℕ ) ( by positivity : 0 < ( c + 1 + 1 ) * ( e + 1 + 1 ) ) ] ), by
                   rw [ Nat.div_div_eq_div_mul, Nat.div_div_eq_div_mul ] ; ring_nf, by
@@ -186,7 +185,7 @@ theorem L8_kron_one {m n : ℕ} :
 theorem L9_zero_add {m n : ℕ} (A : Matrix (Fin m) (Fin n) ℂ) :
     (0 : Matrix (Fin m) (Fin n) ℂ) + A = A := by
       -- By definition of matrix addition, adding the zero matrix to any matrix results in the original matrix. This follows from the fact that addition of complex numbers is commutative and associative.
-      simp [add_zero]
+      simp
 
 theorem L9_add_zero {m n : ℕ} (A : Matrix (Fin m) (Fin n) ℂ) :
     A + (0 : Matrix (Fin m) (Fin n) ℂ) = A := by
@@ -256,9 +255,10 @@ theorem L13_kron_mul_kron {a b c d e f : ℕ}
       simp +decide only [mul_left_comm, mul_comm, Finset.mul_sum _ _ _];
       rw [ Finset.sum_sigma' ];
       refine' Finset.sum_bij ( fun x _ => ⟨ ⟨ x % d, Nat.mod_lt _ ( by
-        cases d <;> aesop ) ⟩, ⟨ x / d, Nat.div_lt_of_lt_mul <| by linarith [ Fin.is_lt x ] ⟩ ⟩ ) _ _ _ _ <;> simp +decide [ Nat.div_add_mod' ];
+        cases d <;> aesop ) ⟩, ⟨ x / d, Nat.div_lt_of_lt_mul <| by linarith [ Fin.is_lt x ] ⟩ ⟩ ) _ _ _ _ <;> simp +decide;
       · exact fun a₁ a₂ h₁ h₂ => Fin.ext <| by nlinarith [ Nat.mod_add_div a₁ d, Nat.mod_add_div a₂ d ] ;
-      · rintro ⟨ ⟨ i, hi ⟩, ⟨ j, hj ⟩ ⟩ ; use ⟨ i + j * d, by nlinarith ⟩ ; simp +decide [ Nat.mod_eq_of_lt, Nat.div_eq_of_lt, hi, hj ] ;
+      · rintro ⟨ ⟨ i, hi ⟩, ⟨ j, hj ⟩ ⟩ ; use ⟨ i + j * d, by nlinarith ⟩ ; simp +decide [Nat.mod_eq_of_lt,
+        hi] ;
         rw [ Nat.add_mul_div_right _ _ ( by linarith ) ] ; aesop;
       · bound
 
@@ -291,7 +291,7 @@ theorem L15_conjTranspose_kron {m n p q : ℕ}
     (A ⊗ B)ᴴ = Aᴴ ⊗ Bᴴ := by
       ext i j;
       unfold Matrix.conjTranspose kron;
-      simp +decide [ Matrix.mul_apply, mul_comm ]
+      simp +decide
 
 
 /-! ## L16: Double conjugate transpose

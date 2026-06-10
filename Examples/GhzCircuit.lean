@@ -33,7 +33,7 @@ theorem CX_ket00 : CX * ket00 = ket00 := by
   ext i j;
   fin_cases i <;> fin_cases j <;> simp +decide [ CX, ket00, Matrix.mul_apply ];
   · unfold B0 B3 X_gate; norm_num [ Fin.sum_univ_succ, Matrix.mul_apply, Matrix.add_mul, Matrix.mul_add ] ;
-    simp +decide [ Matrix.mul_apply, Fin.sum_univ_succ, Fin.sum_univ_zero, Matrix.one_apply, Matrix.mul_apply, kron ];
+    simp +decide [kron];
     simp +decide [ Fin.divNat, Fin.modNat, I₂ ];
   · simp +decide [ B0, B3, X_gate, I₂, kron ];
     simp +decide [ Fin.sum_univ_succ, Fin.modNat, Fin.divNat ];
@@ -44,7 +44,7 @@ theorem CX_ket00 : CX * ket00 = ket00 := by
 
 theorem CX_ket01 : CX * ket01 = ket01 := by
   unfold CX ket01;
-  ext i j; simp +decide [ *, Matrix.mul_apply, Matrix.add_mul, Matrix.mul_add ] ;
+  ext i j; simp +decide [*, Matrix.mul_apply] ;
   fin_cases i <;> fin_cases j <;> simp +decide [ B0, B3, I₂, X_gate, kron ];
   · simp +decide [ Fin.sum_univ_succ, Fin.divNat, Fin.modNat ];
   · simp +decide [ Fin.sum_univ_succ, Matrix.one_apply ];
@@ -54,7 +54,7 @@ theorem CX_ket01 : CX * ket01 = ket01 := by
 
 theorem CX_ket10 : CX * ket10 = ket11 := by
   unfold CX ket10 ket11 B0 X_gate;
-  simp +decide [ Matrix.mul_add, add_mul, Matrix.mul_assoc, Matrix.mul_smul, Matrix.smul_mul, Matrix.mul_one, Matrix.one_mul, B0, B1, B2, B3, ket0, bra0, ket1, bra1, I₂ ];
+  simp +decide [B1, B2, B3, ket0, bra0, ket1, bra1, I₂];
   ext i j;
   simp +decide [ Fin.sum_univ_succ, Matrix.mul_apply, kron ];
   fin_cases i <;> simp +decide [ Fin.divNat, Fin.modNat ]
@@ -62,7 +62,8 @@ theorem CX_ket10 : CX * ket10 = ket11 := by
 theorem CX_ket11 : CX * ket11 = ket10 := by
   unfold CX ket11 ket10;
   ext i j;
-  fin_cases i <;> fin_cases j <;> simp +decide [ Matrix.mul_apply, Matrix.add_apply, Matrix.smul_apply, Fin.sum_univ_succ ];
+  fin_cases i <;> fin_cases j <;> simp +decide [Matrix.mul_apply, Matrix.add_apply,
+    Fin.sum_univ_succ];
   · simp +decide [ B0, B3, X_gate, kron ];
     simp +decide [ Fin.divNat, Fin.modNat ];
   · simp +decide [ B0, B3, X_gate, kron ];
@@ -109,7 +110,7 @@ theorem ghz_layer2 :
       fin_cases i <;> simp +decide [ Fin.modNat, Fin.divNat ];
       · simp +decide [ Matrix.one_apply ];
       · simp +decide [ B1, B2 ];
-      · simp +decide [ B1, B2, I₂ ];
+      · simp +decide [B1, B2];
         rfl
 
 /-

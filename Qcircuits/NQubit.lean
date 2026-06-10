@@ -174,7 +174,7 @@ theorem kron_sum_left {m n p q : ℕ} (s : Finset ι)
     (A : ι → Matrix (Fin m) (Fin n) ℂ) (B : Matrix (Fin p) (Fin q) ℂ) :
     (∑ i ∈ s, A i) ⊗ B = ∑ i ∈ s, (A i ⊗ B) := by
   ext i j;
-  simp +decide [ Matrix.mul_apply, Matrix.sum_apply, Finset.sum_mul _ _ _ ];
+  simp +decide [Matrix.sum_apply];
   simp +decide [ kron ];
   rw [ ← Finset.sum_mul _ _ _, Matrix.sum_apply ]
 
@@ -241,7 +241,7 @@ bra0_n * H_n = (ketp_n)ᴴ
 theorem bra0_n_mul_H_n (n : ℕ) :
     bra0_n n * H_n n = (ketp_n n)ᴴ := by
   rw [ ← QFT_ket0_n ];
-  simp +decide [ ← Matrix.mul_assoc, H_n_conjTranspose ];
+  simp +decide [H_n_conjTranspose];
   rw [ bra0_n_eq_conjTranspose ]
 
 end DiracRepr

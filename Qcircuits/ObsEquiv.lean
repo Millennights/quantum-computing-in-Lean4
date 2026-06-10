@@ -12,7 +12,6 @@ namespace DiracRepr
     A ≈ₒ B ↔ ∃ c : ℂ, ‖c‖ = 1 ∧ c • A = B -/
 def obs_equiv {m n : ℕ} (A B : Matrix (Fin m) (Fin n) ℂ) : Prop :=
   ∃ c : ℂ, ‖c‖ = 1 ∧ c • A = B
-/-! 50代表优先级 -/
 scoped infix:50 " ≈ₒ " => obs_equiv
 
 
@@ -64,8 +63,8 @@ theorem obs_equiv_mul {m n p : ℕ}
     {B D : Matrix (Fin n) (Fin p) ℂ}
     (h1 : A ≈ₒ C) (h2 : B ≈ₒ D) :
     (A * B) ≈ₒ (C * D) := by
-  obtain ⟨ c₁, hc₁, h₁ ⟩ := h1; obtain ⟨ c₂, hc₂, h₂ ⟩ := h2; use c₁ * c₂; simp_all +decide [ mul_assoc, smul_smul ] ;
-  simp +decide [ ← h₁, ← h₂, mul_assoc, smul_mul_assoc ];
+  obtain ⟨ c₁, hc₁, h₁ ⟩ := h1; obtain ⟨ c₂, hc₂, h₂ ⟩ := h2; use c₁ * c₂; simp_all +decide ;
+  simp +decide [← h₁, ← h₂];
   rw [ smul_smul, mul_comm ]
 
 
@@ -93,7 +92,7 @@ theorem ObsEquiv_operator_bwd {n : ℕ} (A B : Matrix (Fin n) (Fin n) ℂ)
     obtain ⟨c, hc⟩ := h (Matrix.of (fun i k => if i = j then 1 else 0));
     exact ⟨ c, hc.1, fun i => by simpa [ Matrix.mul_apply ] using congr_fun ( congr_fun hc.2 i ) 0 ⟩;
   choose c hc using h_exists_c;
-  by_cases hA : ∃ i j, A i j ≠ 0 <;> simp_all +decide [ funext_iff, Matrix.mul_apply ];
+  by_cases hA : ∃ i j, A i j ≠ 0 <;> simp_all +decide;
   · obtain ⟨i₀, j₀, hA₀⟩ : ∃ i₀ j₀, A i₀ j₀ ≠ 0 ∧ ∀ j, A i₀ j = 0 ∨ c j = c j₀ := by
       obtain ⟨i₀, j₀, hA₀⟩ : ∃ i₀ j₀, A i₀ j₀ ≠ 0 := hA
       have h_eq : ∀ j, A i₀ j = 0 ∨ c j = c j₀ := by
@@ -111,7 +110,7 @@ theorem ObsEquiv_operator_bwd {n : ℕ} (A B : Matrix (Fin n) (Fin n) ℂ)
         have h_eq : ∀ t : ℂ, ∃ d : ℂ, ‖d‖ = 1 ∧ d * (A i₀ j₀ + t * A i₀ j) = c j₀ * A i₀ j₀ + t * (c j * A i₀ j) := by
           exact fun t => by obtain ⟨ d, hd₁, hd₂ ⟩ := h_eq t; exact ⟨ d, hd₁, hd₂ i₀ ⟩ ;
         generalize_proofs at *; (
-        obtain ⟨ d₃, hd₃, hd₃' ⟩ := h_eq ( -A i₀ j₀ / A i₀ j ) ; simp_all +decide [ mul_div_cancel₀ ] ;
+        obtain ⟨ d₃, hd₃, hd₃' ⟩ := h_eq ( -A i₀ j₀ / A i₀ j ) ; simp_all +decide ;
         grind))
       use i₀, j₀, hA₀, h_eq;
     refine' ⟨ c j₀, hc j₀ |>.1, _ ⟩;
@@ -140,7 +139,7 @@ Two states are observationally equivalent iff they produce the same density matr
 theorem ObsEquiv_state {n : ℕ}
     (ψ ϕ : Matrix (Fin n) (Fin 1) ℂ) :
     ψ ≈ₒ ϕ ↔ density ψ = density ϕ := by
-  constructor <;> intro h <;> simp_all +decide [ ← Matrix.ext_iff, Fin.forall_fin_two, Complex.ext_iff ];
+  constructor <;> intro h <;> simp_all +decide [← Matrix.ext_iff, Complex.ext_iff];
   · cases' h with c hc;
     simp_all +decide [ ← hc.2, density ];
     norm_num [ Complex.normSq, Complex.norm_def ] at hc;
@@ -157,7 +156,7 @@ theorem ObsEquiv_state {n : ℕ}
         exact not_forall.mp fun h => hϕ <| by ext i j; fin_cases j; aesop;
       set c := ϕ i 0 / ψ i 0 with hc_def
       have hc_norm : ‖c‖ = 1 := by
-        have := h i i; simp_all +decide [ Finset.sum_range_succ', Matrix.mul_apply ] ;
+        have := h i i; simp_all +decide [Matrix.mul_apply] ;
         rw [ div_eq_iff ] <;> simp_all +decide [ Complex.normSq, Complex.norm_def ];
         exact ne_of_gt <| Real.sqrt_pos.mpr <| by specialize h i i; exact not_le.mp fun h' => hi <| by refine' Complex.ext _ _ <;> norm_num <;> nlinarith;
       have hc_eq : ∀ j : Fin n, ϕ j 0 = c * ψ j 0 := by
