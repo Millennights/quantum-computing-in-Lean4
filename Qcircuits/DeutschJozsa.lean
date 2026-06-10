@@ -215,7 +215,41 @@ theorem DJ_circuit_correctness_1 {n : ℕ} (hn : n ≥ 1) (f : Fin (2 ^ n) → B
     (promise : IsConstant f ∨ IsBalanced f) :
     IsConstant f ↔
       (((bra0_n n ⊗ bra1) * DJ_output n f)^2 = 1) := by
-      sorry
+  -- By `DJ_amplitude_zero`, the amplitude is `(1/2^n) • djPhaseSum • 1`.
+  have h_amplitude : (bra0_n n ⊗ bra1) * DJ_output n f =
+      (1 / (2 : ℂ) ^ n) • ((djPhaseSum n f : ℤ) : ℂ) • (1 : Matrix (Fin 1) (Fin 1) ℂ) :=
+    DJ_amplitude_zero n f
+  -- For `1×1` matrices, `M^2 = 1` is equivalent to `(M 0 0)^2 = 1`.
+  have entry : ∀ M : Matrix (Fin 1) (Fin 1) ℂ, (M ^ 2 = 1 ↔ (M 0 0) ^ 2 = 1) := by
+    intro M
+    rw [pow_two, sq]
+    constructor
+    · intro h
+      have := congrFun (congrFun h 0) 0
+      simpa [Matrix.mul_apply, Fin.sum_univ_one, Matrix.one_apply] using this
+    · intro h
+      ext i j
+      fin_cases i; fin_cases j
+      simpa [Matrix.mul_apply, Fin.sum_univ_one, Matrix.one_apply] using h
+  rw [entry]
+  -- Compute the single entry of the amplitude matrix.
+  have hentry : ((bra0_n n ⊗ bra1) * DJ_output n f) 0 0 =
+      (1 / (2 : ℂ) ^ n) * ((djPhaseSum n f : ℤ) : ℂ) := by
+    rw [h_amplitude]
+    simp [Matrix.smul_apply]
+  rw [hentry]
+  have h2 : (2 : ℂ) ^ n ≠ 0 := pow_ne_zero n (by norm_num)
+  constructor
+  · intro hc
+    rcases djPhaseSum_constant f hc with h | h <;> rw [h] <;> push_cast
+    · rw [one_div, inv_mul_cancel₀ h2, one_pow]
+    · rw [mul_neg, one_div, inv_mul_cancel₀ h2, neg_one_sq]
+  · intro hsq
+    by_contra h_not_const
+    have h_bal : IsBalanced f := promise.resolve_left h_not_const
+    have h0 := djPhaseSum_balanced hn f h_bal
+    rw [h0] at hsq
+    simp at hsq
 
 
 /-! ## example Constant f ≡ 0 -/
