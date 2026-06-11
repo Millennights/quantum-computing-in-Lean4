@@ -4,8 +4,6 @@ Quantum-computing-in-Lean4 has formalized some quantum algorithm including Deuts
 
 ## Documentation
 
-The library is organised into the following core modules:
-
 | Module | Description |
 |--------|-------------|
 | `Qcircuits/Basic` | Fundamental definitions: qubits, quantum gates. |
