@@ -182,7 +182,7 @@ theorem DJ_amplitude_zero (n : ℕ) (f : Fin (2 ^ n) → Bool) :
   exact mul_one _
 
 
-/-! ### Balanced  -/
+/-! ### Balanced_correctness  -/
 
 /-- For balanced f with n ≥ 1, the DJ output is orthogonal to |0⟩^n ⊗ |1⟩ -/
 theorem DJ_general_balanced_orthogonal {n : ℕ} (hn : n ≥ 1)
@@ -193,7 +193,7 @@ theorem DJ_general_balanced_orthogonal {n : ℕ} (hn : n ≥ 1)
   simp [h]
 
 
-/-! ### Constant  -/
+/-! ### Constant_correctness  -/
 
 theorem DJ_circuit_correctness {n : ℕ} (hn : n ≥ 1) (f : Fin (2 ^ n) → Bool)
     (promise : IsConstant f ∨ IsBalanced f) :
@@ -295,7 +295,7 @@ theorem DJ_full_const1 (n : ℕ) :
   rw [Matrix.mul_neg, L13_kron_mul_kron, QFT_ketp_n, H_ket_minus]
 
 
-/-! ## example Balanced Function: f(x) = x mod 2 (generalized identity) -/
+/-! ## example Balanced Function: f(x) = x mod 2 -/
 
 /-- The generalized identity function: f(x) = (x mod 2 = 1).
     For n = 1, this equals f(0) = false, f(1) = true, i.e., f(x) = x. -/

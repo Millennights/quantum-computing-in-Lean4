@@ -159,6 +159,11 @@ def stdKet {m : ℕ} (x : Fin m) : Matrix (Fin m) (Fin 1) ℂ :=
 def stdBra {m : ℕ} (x : Fin m) : Matrix (Fin 1) (Fin m) ℂ :=
   Matrix.of fun _ j => if j = x then 1 else 0
 
+/-- The conjugate transpose of a standard ket is the corresponding standard bra. -/
+theorem stdKet_conjTranspose {m : ℕ} (x : Fin m) : (stdKet x)ᴴ = stdBra x := by
+  ext i j
+  simp [stdKet, stdBra, Matrix.conjTranspose_apply, apply_ite]
+
 /-- Standard basis projector |x⟩⟨x| -/
 def stdProj {m : ℕ} (x : Fin m) : Matrix (Fin m) (Fin m) ℂ :=
   stdKet x * stdBra x
@@ -168,6 +173,30 @@ theorem stdProj_apply {m : ℕ} (x : Fin m) (i j : Fin m) :
     stdProj x i j = if i = x ∧ j = x then 1 else 0 := by
   unfold stdProj stdKet stdBra;
   rw [ Matrix.mul_apply ] ; aesop
+
+/-- `|0⟩^⊗n` is the standard basis ket at index `0`. -/
+theorem ket0_n_eq_stdKet (n : ℕ) : ket0_n n = stdKet (0 : Fin (2 ^ n)) := by
+  induction' n with n ih;
+  · ext i j; fin_cases i; fin_cases j; simp +decide [ stdKet ] ;
+  · convert congr_arg ( fun x => x ⊗ ket0 ) ih using 1;
+    ext i j;
+    simp +decide [ stdKet, ket0, kron ];
+    rcases i with ⟨ _ | i, hi ⟩ <;> simp +decide [Fin.ext_iff] at hi ⊢;
+    · rfl;
+    · rcases i with ( _ | _ | i ) <;> tauto
+
+/-- `⟨x| · |y⟩ = δ(x,y)` for standard basis vectors. -/
+theorem stdBra_stdKet {n : ℕ} (x y : Fin (2 ^ n)) :
+    stdBra x * stdKet y = if x = y then (1 : Matrix (Fin 1) (Fin 1) ℂ) else 0 := by
+  unfold stdBra stdKet; ext i j; simp +decide [ Matrix.mul_apply ] ;
+  fin_cases i ; fin_cases j ; aesop
+
+/-- `|x⟩⟨x| · |y⟩ = δ(x,y) |x⟩`. -/
+theorem stdProj_stdKet {n : ℕ} (x y : Fin (2 ^ n)) :
+    stdProj x * stdKet y = if x = y then stdKet x else 0 := by
+  unfold stdProj;
+  convert congr_arg ( fun m => stdKet x * m ) ( DiracRepr.stdBra_stdKet x y ) using 1 ; norm_num [ Matrix.mul_assoc ];
+  aesop
 
 /-- Tensor product distributes over finite sums on the left -/
 theorem kron_sum_left {m n p q : ℕ} (s : Finset ι)
@@ -188,9 +217,7 @@ theorem kron_sum_right {m n p q : ℕ} (s : Finset ι)
 
 /-! #### Helper lemmas for the amplitude computation -/
 
-/-
-Every entry of ketp_n n equals root2^n (uniform superposition)
--/
+/-- Every entry of ketp_n n equals root2^n (uniform superposition) -/
 theorem ketp_n_entry (n : ℕ) (i : Fin (2 ^ n)) :
     (ketp_n n) i 0 = (s2 : ℂ) ^ n := by
   induction' n with n ih;
@@ -198,32 +225,24 @@ theorem ketp_n_entry (n : ℕ) (i : Fin (2 ^ n)) :
   · convert congr_arg₂ ( · * · ) ( ih ( i.divNat ) ) ( show ket_plus ( i.modNat ) 0 = s2 from ?_ ) using 1;
     rcases i.modNat with ( _ | _ | i ) <;> norm_num [ ket_plus ]
 
-/-
-Entries of ketp_n are real
--/
+/-- Entries of ketp_n are real -/
 theorem ketp_n_entry_conj (n : ℕ) (i : Fin (2 ^ n)) :
     starRingEnd ℂ ((ketp_n n) i 0) = (ketp_n n) i 0 := by
   rw [ ketp_n_entry ] ; norm_num [ Complex.ext_iff, pow_succ ] ; ring;
   erw [ Complex.conj_ofReal ] ; norm_num
 
-/-
-s2² = 1/2 in ℂ
--/
+/-- s2² = 1/2 in ℂ -/
 theorem s2_sq : (s2 : ℂ) ^ 2 = 1 / 2 := by
   norm_num [ Complex.ext_iff, sq ];
   ring_nf; norm_num;
 
-/-
-Hᴴ = H
--/
+/-- Hᴴ = H -/
 theorem H_gate_conjTranspose : (H_gate)ᴴ = H_gate := by
   unfold H_gate;
   unfold B0 B1 B2 B3; norm_num [ ← Matrix.ext_iff ] ;
   erw [ Complex.conj_ofReal ] ; norm_num
 
-/-
-H_n is Hermitian (self-adjoint)
--/
+/-- H_n is Hermitian (self-adjoint) -/
 theorem H_n_conjTranspose (n : ℕ) : (H_n n)ᴴ = H_n n := by
   induction' n with n ih
   · exact Matrix.conjTranspose_one
@@ -235,9 +254,7 @@ theorem H_n_conjTranspose (n : ℕ) : (H_n n)ᴴ = H_n n := by
     simp only [Matrix.conjTranspose_apply] at h2
     rw [h1, h2]
 
-/-
-bra0_n * H_n = (ketp_n)ᴴ
--/
+/-- bra0_n * H_n = (ketp_n)ᴴ -/
 theorem bra0_n_mul_H_n (n : ℕ) :
     bra0_n n * H_n n = (ketp_n n)ᴴ := by
   rw [ ← QFT_ket0_n ];

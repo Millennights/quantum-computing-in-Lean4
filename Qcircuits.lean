@@ -1,1 +1,12 @@
 import Qcircuits.Basic
+import Qcircuits.Laws
+import Qcircuits.Strategies
+import Qcircuits.Density
+import Qcircuits.Equiv
+import Qcircuits.ObsEquiv
+import Qcircuits.NQubit
+import Qcircuits.DeutschJozsa
+import Qcircuits.BernsteinVazirani
+import Qcircuits.Simon
+import Qcircuits.Grover
+import Qcircuits.ExtendedGates

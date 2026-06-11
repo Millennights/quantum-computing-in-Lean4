@@ -27,25 +27,18 @@ theorem L1_bra1_ket0 : bra1 * ket0 = (0 : Matrix (Fin 1) (Fin 1) ℂ) := by
 /-! ## L2: Associativity of scalar product, matrix product, addition, and tensor product
 -/
 
-/-
-Matrix multiplication associativity: `Matrix.mul_assoc`
--/
+/-- Matrix multiplication associativity: `Matrix.mul_assoc` -/
 theorem L2_mul_assoc {l m n p : ℕ}
     (A : Matrix (Fin l) (Fin m) ℂ) (B : Matrix (Fin m) (Fin n) ℂ) (C : Matrix (Fin n) (Fin p) ℂ) :
     A * B * C = A * (B * C) := by
       convert Matrix.mul_assoc A B C
 
-/-
-Matrix addition associativity: `add_assoc`
--/
+/-- Matrix addition associativity: `add_assoc` -/
 theorem L2_add_assoc {m n : ℕ}
     (A B C : Matrix (Fin m) (Fin n) ℂ) : A + B + C = A + (B + C) := by
       rw [ add_assoc ]
 
-/-
-Tensor product associativity (stated via submatrix cast since (a*c)*e ≠ a*(c*e) definitionally)
-(m * p) * r 与 m * (p * r) 在 Lean 中是不同的类型，但它们是同构的，因此我们可以通过一个子矩阵转换来表达它们之间的关系。
--/
+/-- Tensor product associativity (stated via submatrix cast since (a*c)*e ≠ a*(c*e) definitionally) -/
 theorem L2_kron_assoc {a b c d e f : ℕ}
     (A : Matrix (Fin a) (Fin b) ℂ) (B : Matrix (Fin c) (Fin d) ℂ) (C : Matrix (Fin e) (Fin f) ℂ) :
     ∀ (i : Fin ((a * c) * e)) (j : Fin ((b * d) * f)),
