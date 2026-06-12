@@ -27,7 +27,7 @@ AI tools have assisted with proving process. Domain contributors remain responsi
 
 ## Contributors (alphabetical by surname)
 
-**Contributors:** :
+**Contributors** :
 
 
 ## References
