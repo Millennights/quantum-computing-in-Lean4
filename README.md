@@ -1,5 +1,5 @@
 # Quantum-computing-in-Lean4
-Quantum-computing-in-Lean4 has formalized some quantum algorithm including Deutsch-Jozsa algorithm, Bernstein-Vazirani algorithm, Simon's algorithm and Grover's algorithm in Lean4. For some algorithms that require multiple runs, we verify the expected output of a single run.
+Quantum-computing-in-Lean4 has formally verified some quantum algorithms including Deutsch-Jozsa algorithm, Bernstein-Vazirani algorithm, Simon's algorithm and Grover's algorithm in Lean4. For some algorithms that require multiple runs, we verify the expected output of a single run, which means such verifications don't include computational complexity analysis. Beyond, Shor' algorithm is also in the process of verification.
 
 
 ## Documentation
